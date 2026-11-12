@@ -1,0 +1,1035 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CryptoLab - Cryptography Playground</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+              mono: ["JetBrains Mono", "monospace"],
+            },
+            colors: {
+              cyber: {
+                bg: "#090d16",
+                card: "#111827",
+                border: "#1f2937",
+                accent: "#10b981", // Emerald
+                cyan: "#06b6d4", // Cyan
+              },
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body
+    class="bg-cyber-bg text-gray-100 font-sans min-h-screen flex flex-col selection:bg-emerald-500/30 selection:text-emerald-200"
+  >
+    <!-- Header / Navbar -->
+    <header
+      class="border-b border-cyber-border bg-cyber-card/80 backdrop-blur-md sticky top-0 z-30"
+    >
+      <div
+        class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-4"
+      >
+        <div class="flex items-center gap-3">
+          <div
+            class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center text-gray-950 font-bold text-xl shadow-lg shadow-emerald-500/20"
+          >
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <div>
+            <h1
+              class="text-xl font-bold tracking-tight bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent"
+            >
+              CryptoLab
+              <span
+                class="text-xs font-mono uppercase tracking-widest text-gray-400 ml-1 border border-gray-700 px-2 py-0.5 rounded-full"
+                >v2.0</span
+              >
+            </h1>
+            <p class="text-xs text-gray-400">
+              Interactive Cryptography & Security Playground
+            </p>
+          </div>
+        </div>
+        <div
+          class="flex items-center gap-2 text-xs font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-full"
+        >
+          <span
+            class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"
+          ></span>
+          <span>Web Crypto API Active</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 space-y-6">
+      <!-- Algorithm Selection Tabs -->
+      <nav
+        aria-label="Cryptography Algorithms"
+        class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5"
+      >
+        <button
+          onclick="switchTab('caesar')"
+          id="tab-caesar"
+          class="tab-btn active-tab flex items-center justify-center gap-2 p-3.5 rounded-xl border text-sm font-semibold transition-all duration-200 cursor-pointer"
+        >
+          <i class="fa-solid fa-rotate text-emerald-400"></i>
+          <span>Caesar Cipher</span>
+        </button>
+        <button
+          onclick="switchTab('vigenere')"
+          id="tab-vigenere"
+          class="tab-btn flex items-center justify-center gap-2 p-3.5 rounded-xl border text-sm font-semibold transition-all duration-200 cursor-pointer"
+        >
+          <i class="fa-solid fa-key text-cyan-400"></i>
+          <span>Vigenère Cipher</span>
+        </button>
+        <button
+          onclick="switchTab('base64')"
+          id="tab-base64"
+          class="tab-btn flex items-center justify-center gap-2 p-3.5 rounded-xl border text-sm font-semibold transition-all duration-200 cursor-pointer"
+        >
+          <i class="fa-solid fa-code text-purple-400"></i>
+          <span>Base64 Encoding</span>
+        </button>
+        <button
+          onclick="switchTab('sha256')"
+          id="tab-sha256"
+          class="tab-btn flex items-center justify-center gap-2 p-3.5 rounded-xl border text-sm font-semibold transition-all duration-200 cursor-pointer"
+        >
+          <i class="fa-solid fa-fingerprint text-amber-400"></i>
+          <span>SHA-256 Hash</span>
+        </button>
+        <button
+          onclick="switchTab('aes')"
+          id="tab-aes"
+          class="tab-btn col-span-2 sm:col-span-1 flex items-center justify-center gap-2 p-3.5 rounded-xl border text-sm font-semibold transition-all duration-200 cursor-pointer"
+        >
+          <i class="fa-solid fa-lock text-rose-400"></i>
+          <span>AES-GCM (Modern)</span>
+        </button>
+      </nav>
+
+      <!-- Roman Urdu Guide Banner (Dynamic per tab) -->
+      <section
+        id="guide-box"
+        class="bg-gradient-to-r from-gray-900 via-gray-900 to-emerald-950/30 border border-emerald-500/30 rounded-2xl p-5 shadow-lg"
+      >
+        <div class="flex items-start gap-4">
+          <div
+            class="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0 mt-0.5"
+          >
+            <i class="fa-solid fa-book-open"></i>
+          </div>
+          <div class="space-y-1.5">
+            <div class="flex flex-wrap items-center gap-2">
+              <h2 id="guide-title" class="text-base font-bold text-white">
+                Caesar Cipher Kya Hai?
+              </h2>
+              <span
+                id="guide-badge"
+                class="text-xs font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                >Classic Substitution</span
+              >
+            </div>
+            <p id="guide-desc" class="text-sm text-gray-300 leading-relaxed">
+              Yeh tareeqa Julius Caesar ne apne khufiya paighamat bhejne ke liye
+              istemal kiya tha. Is mein har letter (A-Z) ko aik khas number
+              (Shift) ke mutabiq aage ya peeche khiskaya jata hai. Maslan agar
+              Shift 3 ho to 'A' ban jata hai 'D'.
+            </p>
+            <p id="guide-usage" class="text-xs text-cyan-400 font-medium pt-1">
+              <i class="fa-solid fa-circle-info mr-1"></i> Istemal: Yeh aaj kal
+              sirf seekhne ke liye istemal hota hai kyunke sirf 25 shifts check
+              karke isay aasani se tora ja sakta hai.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Main Interactive Workspace Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Left Column: Controls & Input (7 cols) -->
+        <div class="lg:col-span-7 space-y-5">
+          <div
+            class="bg-cyber-card border border-cyber-border rounded-2xl p-5 sm:p-6 shadow-xl space-y-5"
+          >
+            <!-- Algorithm Specific Controls -->
+            <div id="controls-area" class="space-y-4">
+              <!-- Caesar Controls -->
+              <div id="ctrl-caesar" class="ctrl-panel space-y-3">
+                <div class="flex items-center justify-between">
+                  <label
+                    for="caesar-shift"
+                    class="text-sm font-medium text-gray-300"
+                  >
+                    Shift Value (Kitne haroof aage khiskana hai):
+                  </label>
+                  <span
+                    id="caesar-shift-val"
+                    class="font-mono text-sm font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 rounded-lg"
+                    >3</span
+                  >
+                </div>
+                <input
+                  type="range"
+                  id="caesar-shift"
+                  min="1"
+                  max="25"
+                  value="3"
+                  oninput="updateCaesarShift(this.value)"
+                  class="w-full accent-emerald-500 h-2 bg-gray-800 rounded-lg cursor-pointer"
+                />
+                <div
+                  class="flex justify-between text-xs font-mono text-gray-500"
+                >
+                  <span>1 (Kamzor)</span>
+                  <span>13 (ROT13)</span>
+                  <span>25</span>
+                </div>
+                <!-- Live Alphabet Mapping Preview -->
+                <div
+                  class="bg-gray-950/80 border border-gray-800 rounded-xl p-3 text-xs font-mono overflow-x-auto"
+                >
+                  <div class="text-gray-400 mb-1">Alphabet Shift Preview:</div>
+                  <div class="text-gray-300 tracking-widest">
+                    A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+                  </div>
+                  <div
+                    id="caesar-preview-map"
+                    class="text-emerald-400 tracking-widest mt-1 font-semibold"
+                  >
+                    D E F G H I J K L M N O P Q R S T U V W X Y Z A B C
+                  </div>
+                </div>
+              </div>
+
+              <!-- Vigenere Controls -->
+              <div id="ctrl-vigenere" class="ctrl-panel hidden space-y-3">
+                <label
+                  for="vigenere-key"
+                  class="block text-sm font-medium text-gray-300"
+                >
+                  Secret Keyword (Sirf English letters likhein):
+                </label>
+                <div class="relative">
+                  <input
+                    type="text"
+                    id="vigenere-key"
+                    value="PAKISTAN"
+                    placeholder="Maslan: SECRETKEY"
+                    oninput="handleInputChange()"
+                    class="w-full bg-gray-950 border border-gray-700 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 rounded-xl px-4 py-3 text-sm font-mono uppercase text-cyan-300 outline-none transition"
+                  />
+                  <span
+                    class="absolute right-3 top-3 text-xs text-gray-500 font-mono"
+                    >Key</span
+                  >
+                </div>
+                <p class="text-xs text-gray-400">
+                  Har letter ko is keyword ke haroof ke mutabiq alag shift milta
+                  hai.
+                </p>
+              </div>
+
+              <!-- Base64 Controls -->
+              <div id="ctrl-base64" class="ctrl-panel hidden">
+                <div
+                  class="bg-purple-500/10 border border-purple-500/20 rounded-xl p-3.5 text-xs text-purple-200 flex items-center gap-3"
+                >
+                  <i
+                    class="fa-solid fa-triangle-exclamation text-purple-400 text-base"
+                  ></i>
+                  <span
+                    >Note: Base64 encryption nahi balke
+                    <strong>Encoding</strong> hai. Isay koi bhi bina password ke
+                    wapas decode kar sakta hai.</span
+                  >
+                </div>
+              </div>
+
+              <!-- SHA-256 Controls -->
+              <div id="ctrl-sha256" class="ctrl-panel hidden">
+                <div
+                  class="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3.5 text-xs text-amber-200 flex items-center gap-3"
+                >
+                  <i
+                    class="fa-solid fa-shield-cat text-amber-400 text-base"
+                  ></i>
+                  <span
+                    >Live Hashing: Jaise hi aap neeche text likhenge, uska
+                    256-bit (64 characters) digital fingerprint foran ban
+                    jayega.</span
+                  >
+                </div>
+              </div>
+
+              <!-- AES-GCM Controls -->
+              <div id="ctrl-aes" class="ctrl-panel hidden space-y-3">
+                <div class="flex items-center justify-between">
+                  <label
+                    for="aes-password"
+                    class="text-sm font-medium text-gray-300"
+                  >
+                    Strong Password / Passphrase:
+                  </label>
+                  <span
+                    id="password-strength-label"
+                    class="text-xs font-mono px-2 py-0.5 rounded bg-gray-800 text-gray-400"
+                    >Strength: Medium</span
+                  >
+                </div>
+                <div class="relative">
+                  <input
+                    type="password"
+                    id="aes-password"
+                    value="MySecretPass123!"
+                    placeholder="Apna mazboot password likhein..."
+                    oninput="checkPasswordStrength(this.value)"
+                    class="w-full bg-gray-950 border border-gray-700 focus:border-rose-500 focus:ring-1 focus:ring-rose-500 rounded-xl px-4 py-3 pr-12 text-sm font-mono text-rose-200 outline-none transition"
+                  />
+                  <button
+                    type="button"
+                    onclick="togglePasswordVisibility()"
+                    class="absolute right-3 top-3 text-gray-400 hover:text-white p-1"
+                    title="Password dekhein/chupayein"
+                  >
+                    <i id="eye-icon" class="fa-solid fa-eye"></i>
+                  </button>
+                </div>
+                <!-- Strength Meter Bar -->
+                <div
+                  class="w-full h-1.5 bg-gray-800 rounded-full overflow-hidden"
+                >
+                  <div
+                    id="password-strength-bar"
+                    class="h-full bg-amber-500 transition-all duration-300"
+                    style="width: 65%"
+                  ></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Input Textarea -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <label
+                  for="input-text"
+                  class="text-sm font-semibold text-gray-200"
+                >
+                  Apna Paigham (Input Text):
+                </label>
+                <div class="flex items-center gap-2">
+                  <button
+                    onclick="loadSampleText()"
+                    class="text-xs text-cyan-400 hover:text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 px-2.5 py-1 rounded-lg transition cursor-pointer"
+                  >
+                    Sample Text Dalein
+                  </button>
+                  <button
+                    onclick="clearAll()"
+                    class="text-xs text-gray-400 hover:text-rose-400 bg-gray-800 hover:bg-gray-700 px-2.5 py-1 rounded-lg transition cursor-pointer"
+                  >
+                    Saaf Karein
+                  </button>
+                </div>
+              </div>
+              <textarea
+                id="input-text"
+                rows="4"
+                oninput="handleInputChange()"
+                placeholder="Yahan apna plain text ya encrypted code likhein..."
+                class="w-full bg-gray-950 border border-gray-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 rounded-xl p-4 text-sm font-mono text-gray-100 placeholder-gray-600 outline-none transition resize-y"
+              >
+Assalam-o-Alaikum! Yeh mera khufiya paigham hai.</textarea
+              >
+              <div class="flex justify-between text-xs text-gray-500 font-mono">
+                <span id="char-count">Characters: 48</span>
+                <span>UTF-8 Supported</span>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div id="action-buttons" class="grid grid-cols-2 gap-3 pt-1">
+              <button
+                onclick="processCrypto('encrypt')"
+                id="btn-encrypt"
+                class="flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-gray-950 font-bold py-3 px-4 rounded-xl shadow-lg shadow-emerald-500/20 transition transform active:scale-98 cursor-pointer"
+              >
+                <i class="fa-solid fa-lock"></i>
+                <span id="btn-encrypt-text">Encrypt Karein</span>
+              </button>
+              <button
+                onclick="processCrypto('decrypt')"
+                id="btn-decrypt"
+                class="flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white font-semibold py-3 px-4 rounded-xl transition transform active:scale-98 cursor-pointer"
+              >
+                <i class="fa-solid fa-unlock text-cyan-400"></i>
+                <span id="btn-decrypt-text">Decrypt Karein</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Output & Cryptanalysis (5 cols) -->
+        <div class="lg:col-span-5 space-y-5">
+          <!-- Output Card -->
+          <div
+            class="bg-cyber-card border border-cyber-border rounded-2xl p-5 sm:p-6 shadow-xl flex flex-col justify-between space-y-4"
+          >
+            <div class="flex items-center justify-between">
+              <h3
+                class="text-sm font-semibold text-gray-200 flex items-center gap-2"
+              >
+                <i class="fa-solid fa-terminal text-emerald-400"></i>
+                <span>Result (Output):</span>
+              </h3>
+              <div class="flex items-center gap-2">
+                <button
+                  id="btn-swap"
+                  onclick="swapText()"
+                  title="Output ko Input mein bhejein"
+                  class="flex items-center gap-1.5 text-xs bg-gray-800 hover:bg-gray-700 text-cyan-300 border border-gray-700 px-3 py-1.5 rounded-lg transition cursor-pointer"
+                >
+                  <i class="fa-solid fa-arrows-up-down"></i>
+                  <span>Swap</span>
+                </button>
+                <button
+                  onclick="copyOutput()"
+                  class="flex items-center gap-1.5 text-xs bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 px-3 py-1.5 rounded-lg transition cursor-pointer"
+                >
+                  <i class="fa-regular fa-copy"></i>
+                  <span id="copy-text">Copy</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Error Message Banner (Hidden by default) -->
+            <div
+              id="error-box"
+              class="hidden bg-rose-500/10 border border-rose-500/40 text-rose-300 text-xs p-3 rounded-xl flex items-start gap-2"
+            >
+              <i
+                class="fa-solid fa-circle-exclamation mt-0.5 text-rose-400"
+              ></i>
+              <span id="error-msg">Error message yahan dikhega.</span>
+            </div>
+
+            <!-- Output Display -->
+            <div class="relative">
+              <textarea
+                id="output-text"
+                readonly
+                rows="5"
+                placeholder="Result yahan zahir hoga..."
+                class="w-full bg-gray-950 border border-gray-800 rounded-xl p-4 text-sm font-mono text-emerald-300 placeholder-gray-600 outline-none resize-y select-all"
+              ></textarea>
+            </div>
+
+            <div
+              class="flex items-center justify-between text-xs text-gray-500 font-mono"
+            >
+              <span id="output-status">Tayyar (Ready)</span>
+              <span id="output-length">Length: 0</span>
+            </div>
+          </div>
+
+          <!-- Frequency Analysis Visualization (Hacker's Tool) -->
+          <div
+            id="frequency-card"
+            class="bg-cyber-card border border-cyber-border rounded-2xl p-5 shadow-xl space-y-3"
+          >
+            <div class="flex items-center justify-between">
+              <div>
+                <h3
+                  class="text-sm font-semibold text-gray-200 flex items-center gap-2"
+                >
+                  <i class="fa-solid fa-chart-simple text-cyan-400"></i>
+                  <span>Frequency Analysis (Hacker View)</span>
+                </h3>
+                <p class="text-xs text-gray-400 mt-0.5">
+                  Output mein har letter kitni baar aaya hai (Classic ciphers
+                  isi se toot'te hain).
+                </p>
+              </div>
+            </div>
+
+            <!-- Bar Chart Container -->
+            <div
+              id="freq-chart"
+              class="h-32 bg-gray-950 border border-gray-800 rounded-xl p-3 flex items-end justify-between gap-1 overflow-x-auto"
+            >
+              <!-- Bars injected dynamically via JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-cyber-border bg-cyber-card/50 py-5 mt-8">
+      <div
+        class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-500"
+      >
+        <p>CryptoLab &copy; 2026 — Educational Cryptography Simulator</p>
+        <p class="font-mono text-gray-400">
+          Tamam processing aapke browser mein locally hoti hai (100% Private).
+        </p>
+      </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+      // Current active algorithm state
+      let currentTab = "caesar";
+
+      // Roman Urdu Guide Content for each algorithm
+      const guides = {
+        caesar: {
+          title: "Caesar Cipher Kya Hai?",
+          badge: "Classic Substitution",
+          desc: "Yeh tareeqa Julius Caesar ne apne khufiya paighamat bhejne ke liye istemal kiya tha. Is mein har letter (A-Z) ko aik khas number (Shift) ke mutabiq aage ya peeche khiskaya jata hai. Maslan agar Shift 3 ho to 'A' ban jata hai 'D'.",
+          usage:
+            "Istemal: Yeh aaj kal sirf seekhne ke liye istemal hota hai kyunke sirf 25 shifts check karke isay aasani se tora ja sakta hai.",
+        },
+        vigenere: {
+          title: "Vigenère Cipher Kya Hai?",
+          badge: "Polyalphabetic Cipher",
+          desc: "Caesar cipher ko mazboot banane ke liye Vigenère cipher banaya gaya. Is mein aik number ke bajaye aik poora lafz (Keyword) istemal hota hai. Keyword ke har letter ke mutabiq alag-alag shift lagta hai.",
+          usage:
+            'Istemal: Sadiyon tak isay "na-qabil-e-taskheer" samjha jata raha, lekin frequency analysis se isay bhi tora ja sakta hai.',
+        },
+        base64: {
+          title: "Base64 Encoding Kya Hai?",
+          badge: "Data Encoding",
+          desc: "Base64 kisi bhi text ya binary data ko 64 aam characters (A-Z, a-z, 0-9, +, /) mein tabdeel karta hai taake data internet par bina kharab hue safar kar sake.",
+          usage:
+            "Istemal: Emails mein files bhejne aur web development mein images ya tokens ko text format mein dikhane ke liye.",
+        },
+        sha256: {
+          title: "SHA-256 Hashing Kya Hai?",
+          badge: "One-Way Cryptographic Hash",
+          desc: 'Hashing encryption se mukhtalif hai kyunke yeh "One-Way" hoti hai—yani hash se wapas asal text nahi banaya ja sakta. Choti si tabdeeli se bhi poora hash badal jata hai (Avalanche Effect).',
+          usage:
+            "Istemal: Passwords ko database mein mehfooz rakhne, Bitcoin/Blockchain, aur files ki integrity check karne ke liye.",
+        },
+        aes: {
+          title: "AES-GCM (256-bit) Kya Hai?",
+          badge: "Military-Grade Encryption",
+          desc: "AES (Advanced Encryption Standard) duniya ka sab se zyada istemal hone wala modern encryption algorithm hai. Is mein aapke password se PBKDF2 ke zariye aik mazboot key banayi jati hai aur random IV (Salt) ke sath data lock kiya jata hai.",
+          usage:
+            "Istemal: WhatsApp chats, Online Banking, Wi-Fi (WPA3), aur Government secrets ko mehfooz rakhne ke liye.",
+        },
+      };
+
+      // Initialize on Window Load
+      window.onload = function () {
+        updateCaesarShift(3);
+        processCrypto("encrypt");
+      };
+
+      // Switch Tabs Function
+      function switchTab(tabId) {
+        currentTab = tabId;
+        hideError();
+
+        // Update Tab Button Styles
+        document.querySelectorAll(".tab-btn").forEach((btn) => {
+          btn.classList.remove(
+            "active-tab",
+            "bg-emerald-500/15",
+            "border-emerald-500",
+            "text-white",
+            "shadow-lg",
+            "shadow-emerald-500/10",
+          );
+          btn.classList.add(
+            "bg-cyber-card",
+            "border-cyber-border",
+            "text-gray-400",
+            "hover:text-gray-200",
+            "hover:border-gray-600",
+          );
+        });
+
+        const activeBtn = document.getElementById(`tab-${tabId}`);
+        activeBtn.classList.remove(
+          "bg-cyber-card",
+          "border-cyber-border",
+          "text-gray-400",
+          "hover:text-gray-200",
+          "hover:border-gray-600",
+        );
+        activeBtn.classList.add(
+          "active-tab",
+          "bg-emerald-500/15",
+          "border-emerald-500",
+          "text-white",
+          "shadow-lg",
+          "shadow-emerald-500/10",
+        );
+
+        // Update Guide Box
+        const guide = guides[tabId];
+        document.getElementById("guide-title").textContent = guide.title;
+        document.getElementById("guide-badge").textContent = guide.badge;
+        document.getElementById("guide-desc").textContent = guide.desc;
+        document.getElementById("guide-usage").innerHTML =
+          `<i class="fa-solid fa-circle-info mr-1"></i> ${guide.usage}`;
+
+        // Show/Hide Control Panels
+        document
+          .querySelectorAll(".ctrl-panel")
+          .forEach((panel) => panel.classList.add("hidden"));
+        document.getElementById(`ctrl-${tabId}`).classList.remove("hidden");
+
+        // Adjust Action Buttons & Swap based on mode
+        const btnEncryptText = document.getElementById("btn-encrypt-text");
+        const btnDecrypt = document.getElementById("btn-decrypt");
+        const btnSwap = document.getElementById("btn-swap");
+        const freqCard = document.getElementById("frequency-card");
+
+        if (tabId === "sha256") {
+          btnEncryptText.textContent = "Generate Hash";
+          btnDecrypt.classList.add("hidden");
+          btnSwap.classList.add("hidden");
+          document
+            .getElementById("action-buttons")
+            .classList.replace("grid-cols-2", "grid-cols-1");
+          freqCard.classList.add("hidden");
+          generateSHA256();
+        } else {
+          btnDecrypt.classList.remove("hidden");
+          btnSwap.classList.remove("hidden");
+          document
+            .getElementById("action-buttons")
+            .classList.replace("grid-cols-1", "grid-cols-2");
+
+          if (tabId === "base64") {
+            btnEncryptText.textContent = "Encode (Base64)";
+            document.getElementById("btn-decrypt-text").textContent =
+              "Decode (Text)";
+          } else {
+            btnEncryptText.textContent = "Encrypt Karein";
+            document.getElementById("btn-decrypt-text").textContent =
+              "Decrypt Karein";
+          }
+
+          // Show Frequency Analysis for Classic Ciphers
+          if (tabId === "caesar" || tabId === "vigenere") {
+            freqCard.classList.remove("hidden");
+          } else {
+            freqCard.classList.add("hidden");
+          }
+          processCrypto("encrypt");
+        }
+      }
+
+      // Handle Live Input Typing
+      function handleInputChange() {
+        const text = document.getElementById("input-text").value;
+        document.getElementById("char-count").textContent =
+          `Characters: ${text.length}`;
+        hideError();
+
+        if (currentTab === "sha256") {
+          generateSHA256();
+        } else if (
+          currentTab === "caesar" ||
+          currentTab === "vigenere" ||
+          currentTab === "base64"
+        ) {
+          processCrypto("encrypt");
+        }
+      }
+
+      // Update Caesar Shift Slider & Preview
+      function updateCaesarShift(val) {
+        const shift = parseInt(val);
+        document.getElementById("caesar-shift-val").textContent = shift;
+
+        const alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        let shifted = "";
+        for (let i = 0; i < 26; i++) {
+          shifted += alpha[(i + shift) % 26] + " ";
+        }
+        document.getElementById("caesar-preview-map").textContent =
+          shifted.trim();
+
+        if (currentTab === "caesar") {
+          processCrypto("encrypt");
+        }
+      }
+
+      // Main Process Dispatcher
+      async function processCrypto(mode) {
+        hideError();
+        const input = document.getElementById("input-text").value;
+        let result = "";
+
+        try {
+          if (!input.trim() && currentTab !== "sha256") {
+            setOutput("", "Khali input");
+            updateFrequencyChart("");
+            return;
+          }
+
+          if (currentTab === "caesar") {
+            const shift = parseInt(
+              document.getElementById("caesar-shift").value,
+            );
+            result = caesarCipher(input, shift, mode === "decrypt");
+            setOutput(
+              result,
+              mode === "encrypt"
+                ? `Encrypted (Shift +${shift})`
+                : `Decrypted (Shift -${shift})`,
+            );
+            updateFrequencyChart(result);
+          } else if (currentTab === "vigenere") {
+            const key = document
+              .getElementById("vigenere-key")
+              .value.replace(/[^a-zA-Z]/g, "");
+            if (!key) {
+              showError(
+                "Meherbani karke Vigenère keyword mein kam az kam aik English letter likhein.",
+              );
+              return;
+            }
+            result = vigenereCipher(input, key, mode === "decrypt");
+            setOutput(
+              result,
+              mode === "encrypt"
+                ? `Encrypted (Key: ${key.toUpperCase()})`
+                : `Decrypted (Key: ${key.toUpperCase()})`,
+            );
+            updateFrequencyChart(result);
+          } else if (currentTab === "base64") {
+            if (mode === "encrypt") {
+              // UTF-8 safe Base64 encoding
+              result = btoa(unescape(encodeURIComponent(input)));
+              setOutput(result, "Base64 Encoded");
+            } else {
+              result = decodeURIComponent(escape(atob(input.trim())));
+              setOutput(result, "Base64 Decoded");
+            }
+          } else if (currentTab === "sha256") {
+            await generateSHA256();
+          } else if (currentTab === "aes") {
+            const password = document.getElementById("aes-password").value;
+            if (!password) {
+              showError(
+                "AES encryption/decryption ke liye password likhna zaroori hai.",
+              );
+              return;
+            }
+            if (mode === "encrypt") {
+              setOutput("Encrypting...", "Processing...");
+              result = await aesEncrypt(input, password);
+              setOutput(result, "AES-GCM 256-bit Encrypted");
+            } else {
+              setOutput("Decrypting...", "Processing...");
+              result = await aesDecrypt(input.trim(), password);
+              setOutput(result, "AES-GCM Decrypted Successfully");
+            }
+          }
+        } catch (err) {
+          if (currentTab === "base64") {
+            showError("Invalid Base64 string! Yeh sahi Base64 code nahi hai.");
+          } else if (currentTab === "aes") {
+            showError(
+              "Decryption nakam! Ya to password ghalat hai ya encrypted code kharab ho chuka hai.",
+            );
+          } else {
+            showError("Kuch ghalat ho gaya: " + err.message);
+          }
+          setOutput("", "Error");
+        }
+      }
+
+      // 1. Caesar Cipher Algorithm
+      function caesarCipher(str, shift, decrypt = false) {
+        if (decrypt) shift = (26 - shift) % 26;
+        return str.replace(/[a-zA-Z]/g, function (char) {
+          const base = char <= "Z" ? 65 : 97;
+          return String.fromCharCode(
+            ((char.charCodeAt(0) - base + shift) % 26) + base,
+          );
+        });
+      }
+
+      // 2. Vigenère Cipher Algorithm
+      function vigenereCipher(str, key, decrypt = false) {
+        key = key.toUpperCase();
+        let keyIndex = 0;
+        return str.replace(/[a-zA-Z]/g, function (char) {
+          const base = char <= "Z" ? 65 : 97;
+          let shift = key.charCodeAt(keyIndex % key.length) - 65;
+          if (decrypt) shift = (26 - shift) % 26;
+          keyIndex++;
+          return String.fromCharCode(
+            ((char.charCodeAt(0) - base + shift) % 26) + base,
+          );
+        });
+      }
+
+      // 3. SHA-256 Hashing using Web Crypto API
+      async function generateSHA256() {
+        const input = document.getElementById("input-text").value;
+        const msgBuffer = new TextEncoder().encode(input);
+        const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray
+          .map((b) => b.toString(16).padStart(2, "0"))
+          .join("");
+        setOutput(hashHex, "SHA-256 Hash (256-bit Hex)");
+      }
+
+      // 4. Modern AES-GCM Encryption using Web Crypto API (PBKDF2 + Salt + IV)
+      async function aesEncrypt(plainText, password) {
+        const enc = new TextEncoder();
+        const salt = crypto.getRandomValues(new Uint8Array(16));
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+
+        // Derive key from password
+        const keyMaterial = await crypto.subtle.importKey(
+          "raw",
+          enc.encode(password),
+          { name: "PBKDF2" },
+          false,
+          ["deriveKey"],
+        );
+        const key = await crypto.subtle.deriveKey(
+          { name: "PBKDF2", salt: salt, iterations: 100000, hash: "SHA-256" },
+          keyMaterial,
+          { name: "AES-GCM", length: 256 },
+          false,
+          ["encrypt"],
+        );
+
+        const encrypted = await crypto.subtle.encrypt(
+          { name: "AES-GCM", iv: iv },
+          key,
+          enc.encode(plainText),
+        );
+
+        // Combine Salt (16B) + IV (12B) + Ciphertext into single Base64 string
+        const combined = new Uint8Array(
+          salt.length + iv.length + encrypted.byteLength,
+        );
+        combined.set(salt, 0);
+        combined.set(iv, salt.length);
+        combined.set(new Uint8Array(encrypted), salt.length + iv.length);
+
+        return btoa(String.fromCharCode(...combined));
+      }
+
+      // 5. Modern AES-GCM Decryption
+      async function aesDecrypt(base64Cipher, password) {
+        const enc = new TextEncoder();
+        const dec = new TextDecoder();
+
+        const binaryStr = atob(base64Cipher);
+        const combined = new Uint8Array(binaryStr.length);
+        for (let i = 0; i < binaryStr.length; i++) {
+          combined[i] = binaryStr.charCodeAt(i);
+        }
+
+        if (combined.length < 29) throw new Error("Ciphertext chota hai");
+
+        const salt = combined.slice(0, 16);
+        const iv = combined.slice(16, 28);
+        const ciphertext = combined.slice(28);
+
+        const keyMaterial = await crypto.subtle.importKey(
+          "raw",
+          enc.encode(password),
+          { name: "PBKDF2" },
+          false,
+          ["deriveKey"],
+        );
+        const key = await crypto.subtle.deriveKey(
+          { name: "PBKDF2", salt: salt, iterations: 100000, hash: "SHA-256" },
+          keyMaterial,
+          { name: "AES-GCM", length: 256 },
+          false,
+          ["decrypt"],
+        );
+
+        const decrypted = await crypto.subtle.decrypt(
+          { name: "AES-GCM", iv: iv },
+          key,
+          ciphertext,
+        );
+
+        return dec.decode(decrypted);
+      }
+
+      // Frequency Analysis Chart Builder
+      function updateFrequencyChart(text) {
+        const chart = document.getElementById("freq-chart");
+        const counts = {};
+        const alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        for (let char of alpha) counts[char] = 0;
+
+        let maxCount = 0;
+        const upper = text.toUpperCase();
+        for (let char of upper) {
+          if (counts.hasOwnProperty(char)) {
+            counts[char]++;
+            if (counts[char] > maxCount) maxCount = counts[char];
+          }
+        }
+
+        chart.innerHTML = "";
+        for (let char of alpha) {
+          const count = counts[char];
+          const heightPercent =
+            maxCount > 0 ? Math.round((count / maxCount) * 100) : 0;
+          const barWrapper = document.createElement("div");
+          barWrapper.className =
+            "flex flex-col items-center justify-end h-full flex-1 min-w-[14px] group";
+          barWrapper.title = `${char}: ${count} baar`;
+
+          barWrapper.innerHTML = `
+                    <div class="w-full bg-gray-800 rounded-t-sm flex items-end h-20 overflow-hidden">
+                        <div class="w-full bg-gradient-to-t from-emerald-500 to-cyan-400 transition-all duration-300 rounded-t-sm" style="height: ${heightPercent}%"></div>
+                    </div>
+                    <span class="text-[10px] font-mono text-gray-400 group-hover:text-white mt-1">${char}</span>
+                `;
+          chart.appendChild(barWrapper);
+        }
+      }
+
+      // Password Strength Checker for AES
+      function checkPasswordStrength(pwd) {
+        const bar = document.getElementById("password-strength-bar");
+        const label = document.getElementById("password-strength-label");
+        let score = 0;
+        if (pwd.length >= 8) score++;
+        if (pwd.length >= 12) score++;
+        if (/[A-Z]/.test(pwd) && /[a-z]/.test(pwd)) score++;
+        if (/[0-9]/.test(pwd)) score++;
+        if (/[^A-Za-z0-9]/.test(pwd)) score++;
+
+        if (pwd.length === 0) {
+          bar.style.width = "0%";
+          label.textContent = "Strength: Khali";
+          label.className =
+            "text-xs font-mono px-2 py-0.5 rounded bg-gray-800 text-gray-400";
+        } else if (score <= 2) {
+          bar.style.width = "30%";
+          bar.className = "h-full bg-rose-500 transition-all duration-300";
+          label.textContent = "Strength: Kamzor (Weak)";
+          label.className =
+            "text-xs font-mono px-2 py-0.5 rounded bg-rose-500/20 text-rose-300";
+        } else if (score <= 4) {
+          bar.style.width = "65%";
+          bar.className = "h-full bg-amber-500 transition-all duration-300";
+          label.textContent = "Strength: Darmiyana (Medium)";
+          label.className =
+            "text-xs font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300";
+        } else {
+          bar.style.width = "100%";
+          bar.className = "h-full bg-emerald-500 transition-all duration-300";
+          label.textContent = "Strength: Mazboot (Strong)";
+          label.className =
+            "text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300";
+        }
+      }
+
+      function togglePasswordVisibility() {
+        const pwdInput = document.getElementById("aes-password");
+        const icon = document.getElementById("eye-icon");
+        if (pwdInput.type === "password") {
+          pwdInput.type = "text";
+          icon.classList.replace("fa-eye", "fa-eye-slash");
+        } else {
+          pwdInput.type = "password";
+          icon.classList.replace("fa-eye-slash", "fa-eye");
+        }
+      }
+
+      // Helper Functions
+      function setOutput(text, status) {
+        document.getElementById("output-text").value = text;
+        document.getElementById("output-status").textContent = status;
+        document.getElementById("output-length").textContent =
+          `Length: ${text.length}`;
+      }
+
+      function showError(msg) {
+        const box = document.getElementById("error-box");
+        document.getElementById("error-msg").textContent = msg;
+        box.classList.remove("hidden");
+      }
+
+      function hideError() {
+        document.getElementById("error-box").classList.add("hidden");
+      }
+
+      function copyOutput() {
+        const out = document.getElementById("output-text");
+        if (!out.value) return;
+        out.select();
+        document.execCommand("copy");
+
+        const copyText = document.getElementById("copy-text");
+        copyText.textContent = "Copied!";
+        setTimeout(() => {
+          copyText.textContent = "Copy";
+        }, 1500);
+      }
+
+      function swapText() {
+        const input = document.getElementById("input-text");
+        const output = document.getElementById("output-text");
+        if (!output.value) return;
+        input.value = output.value;
+        document.getElementById("char-count").textContent =
+          `Characters: ${input.value.length}`;
+        processCrypto("decrypt");
+      }
+
+      function loadSampleText() {
+        const samples = [
+          "Cyber security mein cryptography ka kirdar sab se ahem hai.",
+          "Secret Mission: Raat 12 baje purane pul ke paas milna hai.",
+          "Pakistan Zindabad! Digital security seekhna har developer ke liye zaroori hai.",
+        ];
+        const randomSample =
+          samples[Math.floor(Math.random() * samples.length)];
+        document.getElementById("input-text").value = randomSample;
+        handleInputChange();
+      }
+
+      function clearAll() {
+        document.getElementById("input-text").value = "";
+        setOutput("", "Saaf kar diya gaya");
+        document.getElementById("char-count").textContent = "Characters: 0";
+        hideError();
+        updateFrequencyChart("");
+      }
+    </script>
+  </body>
+</html>
